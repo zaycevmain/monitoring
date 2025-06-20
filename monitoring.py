@@ -152,8 +152,10 @@ class ConfigManager:
         }
 
     def edit_interactive(self):
+        """Интерактивное редактирование конфигурационного файла."""
         console.clear()
-        console.print("[bold cyan]=== Настройка конфигурации ===\n")
+        console.print("[bold cyan]=== Интерактивное редактирование конфигурации ===\n")
+        console.print("Нажмите Enter, чтобы оставить текущее значение. Нажмите Ctrl+C для отмены.\n")
         
         try:
             for section in self.config.sections():
@@ -161,20 +163,23 @@ class ConfigManager:
                 for key, value in self.config.items(section):
                     try:
                         new_value = Prompt.ask(
-                            f"{key}",
-                            default=value,
-                            show_default=True
+                            f"  {key}",
+                            default=str(value),
+                            show_default=True,
                         )
                         if new_value != value:
                             self.set(section, key, new_value)
                     except Exception as e:
                         console.print(f"[red]Ошибка при редактировании {section}.{key}: {str(e)}[/red]")
-                        continue
             
             console.print("\n[green]Конфигурация сохранена![/green]")
-            if Confirm.ask("Перезапустить мониторинг?"):
+            if Confirm.ask("\n[bold]Перезапустить мониторинг с новой конфигурацией?[/bold]", default=True):
                 return True
             return False
+
+        except KeyboardInterrupt:
+            console.print("\n\n[yellow]Редактирование отменено. Возврат в главное меню...[/yellow]")
+            return False # Не перезапускать мониторинг
         except Exception as e:
             console.print(f"\n[red]Ошибка при сохранении конфигурации: {str(e)}[/red]")
             input("\nНажмите Enter для продолжения...")
@@ -762,17 +767,22 @@ def main_menu():
         console.print("[3] Просмотр логов")
         console.print("[4] Выход\n")
         
-        choice = Prompt.ask("Выберите действие", choices=["1", "2", "3", "4"])
-        
-        if choice == "1":
-            start_monitoring(config_manager)
-        elif choice == "2":
-            if config_manager.edit_interactive():
+        try:
+            choice = Prompt.ask("Выберите действие", choices=["1", "2", "3", "4"])
+            
+            if choice == "1":
                 start_monitoring(config_manager)
-        elif choice == "3":
-            view_logs()
-        else:
-            sys.exit(0)
+            elif choice == "2":
+                if config_manager.edit_interactive():
+                    start_monitoring(config_manager)
+            elif choice == "3":
+                view_logs()
+            else:
+                console.print("\n[bold green]До свидания![/bold green]")
+                break
+        except KeyboardInterrupt:
+            console.print("\n\n[bold green]До свидания![/bold green]")
+            break
 
 def start_monitoring(config_manager):
     try:
