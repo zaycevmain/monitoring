@@ -1,5 +1,5 @@
 # System & Application Monitoring Tool / Утилита для мониторинга системы и приложений
-
+![Screenshot](https://github.com/zaycevmain/monitoring/blob/main/screen.png)
 ---
 
 A terminal-based tool for comprehensive monitoring of system resources (CPU, Memory, Disk, Temperature) and specific services like PostgreSQL and web applications. Written in Python using the `rich` library.
